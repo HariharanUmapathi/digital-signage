@@ -24,18 +24,22 @@ app
     const server = express()
 
     // Allows for cross origin domain request:
-    server.use(function(req, res, next) {
+    server.use(function (req, res, next) {
       res.header('Access-Control-Allow-Origin', '*')
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+      res.header(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept'
+      )
       next()
     })
 
     // MongoDB
     mongoose.Promise = Promise
-    mongoose.connect(
-      Keys.MONGODB_URI,
-      { useNewUrlParser: true }
-    )
+    mongoose.connect(Keys.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    })
     const db = mongoose.connection
     db.on('error', console.error.bind(console, 'connection error:'))
 
@@ -51,7 +55,7 @@ app
       session({
         secret: Keys.SESSION_SECRET,
         resave: true,
-        saveUninitialized: false
+        saveUninitialized: false,
       })
     )
 
@@ -63,7 +67,7 @@ app
     server.use(passport.session())
 
     let io
-    server.use(function(req, res, next) {
+    server.use(function (req, res, next) {
       res.io = io
       next()
     })
@@ -79,16 +83,16 @@ app
       return handle(req, res)
     })
 
-    const finalServer = server.listen(Keys.PORT, err => {
+    const finalServer = server.listen(Keys.PORT, (err) => {
       if (err) throw err
       // eslint-disable-next-line
-      console.log('> Ready on http://localhost:' + Keys.PORT)
+      console.log("> Ready on http://localhost:" + Keys.PORT);
     })
 
     // Socket.io
     io = socketIo.listen(finalServer)
   })
-  .catch(ex => {
+  .catch((ex) => {
     // eslint-disable-next-line
     console.error(ex.stack)
     process.exit(1)
